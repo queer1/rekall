@@ -31,7 +31,7 @@ import logging
 import json
 import re
 import os
-import string
+import string as s
 import subprocess
 import sys
 import tempfile
@@ -80,7 +80,8 @@ HIGHLIGHT_SCHEME = dict(
     important=("WHITE", "RED"),
     good=("GREEN", None),
     neutral=(None, None),
-    )
+)
+
 
 class Pager(object):
     """A wrapper around a pager.
@@ -168,7 +169,7 @@ class UnicodeWrapper(object):
         return self.fd.isatty()
 
 
-class Formatter(string.Formatter):
+class Formatter(s.Formatter):
     """A formatter which supports extended formating specs."""
     # This comes from http://docs.python.org/library/string.html
     # 7.1.3.1. Format Specification Mini-Language
@@ -234,15 +235,19 @@ class Formatter(string.Formatter):
         return result
 
     def format_type_x(self, value, fields):
+        _ = fields
         return int(value)
 
     def format_type_X(self, value, fields):
+        _ = fields
         return int(value)
 
     def format_type_r(self, value, fields):
+        _ = fields
         return repr(value)
 
     def format_type_f(self, value, fields):
+        _ = fields
         if isinstance(value, (float, int, long)):
             return float(value)
 
@@ -250,6 +255,7 @@ class Formatter(string.Formatter):
 
     def format_type_L(self, value, fields):
         """Support extended list format."""
+        _ = fields
         return ", ".join([utils.SmartUnicode(x) for x in value])
 
 
@@ -468,7 +474,6 @@ class TextTable(object):
             highlight=highlight)
 
 
-
 class RendererBaseClass(object):
     """All renderers inherit from this."""
 
@@ -673,6 +678,7 @@ class TextRenderer(RendererBaseClass):
            suppress_headers: If True table headers will not be written (still
               useful for formatting).
         """
+        _ = kwargs
         # Determine the address size
         address_size = 14
         if (self.session and self.session.profile and
@@ -792,7 +798,7 @@ class JsonFormatter(Formatter):
 
 class JsonColumn(TextColumn):
     """A column in a json table."""
-    def __init__(self, name=None, cname=None, format_spec=None, **kwargs):
+    def __init__(self, name=None, cname=None, **kwargs):
         self.formatter = JsonFormatter()
         self.name = name
         self.cname = cname
@@ -809,7 +815,8 @@ class JsonTable(TextTable):
         self.columns = [JsonColumn(*args) for args in columns]
 
     def render_header(self, renderer):
-        renderer.table_data['headers'] = [c.render_header() for c in self.columns]
+        renderer.table_data['headers'] = [c.render_header()
+                                          for c in self.columns]
 
     def get_header(self, renderer):
         return [c.render_header() for c in self.columns]
@@ -850,7 +857,7 @@ class JsonRenderer(TextRenderer):
 
         self.data['data'].append(statement)
 
-    def table_header(self, columns = None, **kwargs):
+    def table_header(self, columns=None, **kwargs):
         self.table = JsonTable(columns=columns)
 
         # This is the current table - the JsonTable object will write on it.
@@ -909,7 +916,7 @@ class Colorizer(object):
         for capability in capabilities:
             term_string = curses.tigetstr(capability)
             if term_string is not None:
-                term_string = re.sub("\$\<[^>]+>", "", term_string)
+                term_string = re.sub(r"\$\<[^>]+>", "", term_string)
                 break
 
         try:
@@ -936,3 +943,4 @@ class Colorizer(object):
 
         return (escape_seq + utils.SmartUnicode(string) +
                 self.tparm(["sgr0"]))
+
