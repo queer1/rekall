@@ -408,9 +408,25 @@ class TextTable(object):
     """A table is a collection of columns.
 
     This table formats all its cells using proportional text font.
+
+    Args:
+      columns: Column spec tuples (see Renderer).
+
+      tablesep: Column separator.
+
+      sort: Tuple of column names to sort by.
+
+      renderer: I sincerely hope this requires no explanation.
+
+      address_size: Width (in characters) of a printed pointer.
+
+      suppress_headers: Don't print headers.
+
+      elide: Causes strings that are over the length limit to be shortened
+        in the middle.
     """
 
-    def __init__(self, columns=None, tablesep=" ", elide=False,
+    def __init__(self, columns=None, tablesep=" ", elide=False, sort=None,
                  suppress_headers=False, address_size=10, renderer=None):
         self.columns = [
             TextColumn(*args, address_size=address_size, table=self)
@@ -420,6 +436,7 @@ class TextTable(object):
         self.tablesep = tablesep
         self.elide = elide
         self.suppress_headers = suppress_headers
+        self.sort = sort
 
     def write_row(self, renderer, cells, highlight=False):
         """Writes a row of the table.
@@ -663,7 +680,7 @@ class TextRenderer(RendererBaseClass):
         self.ClearProgress()
         self.fd.flush()
 
-    def table_header(self, columns=None, suppress_headers=False,
+    def table_header(self, columns=None, suppress_headers=False, sort=None,
                      **kwargs):
         """Table header renders the title row of a table.
 
@@ -672,23 +689,31 @@ class TextRenderer(RendererBaseClass):
         ordering purposes.
 
         Args:
-           columns: A list of (Name, formatstring) tuples describing
-              the table columns.
+          columns: A list of (Name, formatstring) tuples describing
+            the table columns.
 
-           suppress_headers: If True table headers will not be written (still
-              useful for formatting).
+          suppress_headers: If True table headers will not be written (still
+            useful for formatting).
+
+          sort: A tuple of columns to sort by. Causes writing to be deferred
+            until flush.
         """
         _ = kwargs
+
         # Determine the address size
         address_size = 14
         if (self.session and self.session.profile and
             self.session.profile.metadata("arch") == "I386"):
             address_size = 10
 
-        self.table = TextTable(columns=columns, tablesep=self.tablesep,
-                               suppress_headers=suppress_headers,
-                               address_size=address_size,
-                               renderer=self)
+        self.table = TextTable(
+            columns=columns,
+            tablesep=self.tablesep,
+            suppress_headers=suppress_headers,
+            address_size=address_size,
+            renderer=self,
+            sort=sort
+        )
         self.table.render_header(self)
 
     def table_row(self, *args, **kwargs):

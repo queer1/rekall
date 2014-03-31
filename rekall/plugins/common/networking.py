@@ -31,9 +31,14 @@ class EntityIFConfig(plugin.ProfileCommand):
     __name = "eifconfig"
 
     def render(self, renderer):
-        renderer.table_header([("Interface", "interface", "10"),
-                               ("Family", "af", "10"),
-                               ("Address", "address", "20")])
+        renderer.table_header(
+            columns=[
+                ("Interface", "interface", "10"),
+                ("Family", "af", "10"),
+                ("Address", "address", "20")
+            ],
+            sort=("interface", "af"),
+        )
 
         for interface in self.session.get_entities(entity.NetworkInterface):
             for address in interface.addresses:
