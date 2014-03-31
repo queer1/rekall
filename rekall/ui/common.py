@@ -24,8 +24,6 @@ converting the output of the data layer into a specific format, such as
 HTML, JSON or text table.
 """
 
-__author__ = "Michael Cohen <scudette@gmail.com>"
-
 
 class BaseRenderer(object):
     """All renderers inherit from this."""
