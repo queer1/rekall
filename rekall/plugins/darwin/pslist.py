@@ -53,6 +53,7 @@ class DarwinPsxView(common.DarwinProcessFilter):
 
             renderer.table_row(*row)
 
+
 class DarwinPsList(common.DarwinProcessFilter):
     __name = "pslist"
 
@@ -243,3 +244,4 @@ class DarwinPSAUX(common.DarwinProcessFilter):
                 proc.p_argslen,
                 proc.p_argc,
                 " ".join(proc.argv))
+
